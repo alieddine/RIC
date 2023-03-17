@@ -4,9 +4,21 @@ import math
 from random import uniform
 
 
-class NN:
+class Init:
     def __init__(self):
-        pass
+        self.menu = True
+        self.font = pygame.font.Font('font/cc-ultimatum-bold.otf', 15)
+        self.font3 = pygame.font.Font('font/cc-ultimatum-bold.otf', 50)
+        self.font2 = pygame.font.Font('font/cc-ultimatum-bold.otf', 22)
+        self.name_text = self.font.render('predator vs prey', True, (255, 255, 255))
+        self.clock = pygame.time.Clock()
+        self.preys_number = 0
+        self.predators_number = 0
+        self.display = pygame.display.Info()
+        self.exit_btn = pygame.image.load('images/exist_btn.png')
+        self.menu_background = None
+        self.data = None
+
 
 
 class Position:
@@ -25,7 +37,9 @@ class Animal:
         self.angle = rotation_vel
         self.x, self.y = self.START_POS
         self.acceleration = 0.1
+
         self.health = 100
+    dt = 0
 
     def draw(self, screen, position):
         blit_rotate_center(screen, self.img, (self.x - position.x, self.y - position.y), self.angle)
@@ -44,8 +58,8 @@ class Animal:
             vertical = math.cos(radians) * self.vel
             horizontal = math.sin(radians) * self.vel
 
-            self.y -= vertical
-            self.x -= horizontal
+            self.y -= vertical * Animal.dt
+            self.x -= horizontal * Animal.dt
         else:
             if self.x <= 0:
                 self.x += 1
@@ -58,7 +72,7 @@ class Animal:
                 self.y -= 1
 
     def slowObject(self):
-        self.vel = max(self.vel - self.acceleration / 0.6, 0)
+        self.vel = max(self.vel - self.acceleration / 2, 0)
         self.move()
 
     def update(self):
@@ -77,12 +91,14 @@ class Prey(Animal):
 
     def eat(self, predators):
         for predator in predators:
-            if predator.x <= self.x <= predator.x + predator.IMG.get_size()[0] and predator.y <= self.y <= predator.y + predator.IMG.get_size()[
-                1] \
+            if predator.x <= self.x <= predator.x + predator.IMG.get_size()[0] and predator.y <= self.y <= predator.y + \
+                    predator.IMG.get_size()[
+                        1] \
                     or predator.x <= self.x + predator.IMG.get_size()[0] <= predator.x + predator.IMG.get_size()[
                 0] and predator.y <= self.y <= predator.y + predator.IMG.get_size()[1] \
-                    or predator.x <= self.x <= predator.x + predator.IMG.get_size()[0] and predator.y <= self.y + predator.IMG.get_size()[
-                1] <= predator.y + predator.IMG.get_size()[1] \
+                    or predator.x <= self.x <= predator.x + predator.IMG.get_size()[0] and predator.y <= self.y + \
+                    predator.IMG.get_size()[
+                        1] <= predator.y + predator.IMG.get_size()[1] \
                     or predator.x <= self.x + predator.IMG.get_size()[0] <= predator.x + predator.IMG.get_size()[
                 0] and predator.y <= self.y + predator.IMG.get_size()[1] <= predator.y + predator.IMG.get_size()[1]:
 
