@@ -18,6 +18,19 @@ class Init:
         self.exit_btn = pygame.image.load('images/exist_btn.png')
         self.menu_background = None
         self.data = None
+        self.preys_rect = []
+        self.predators_rect = []
+        self.right_panel_state = True
+        self.zoom = 1
+        self.buttons_position = {"cancel_selected" : (0, 0)}
+        self.prey_original_img = pygame.transform.rotate(scale_image(pygame.image.load("images/green_object_FILL.png"), 0.2), 90)
+        self.predator_original_img = pygame.transform.rotate(scale_image(pygame.image.load("images/red_object_FILL.png"), 0.2), 90)
+        self.predator1_original_img = pygame.transform.rotate(scale_image(pygame.image.load("images/test_object.png"), 0.2), 90)
+        # self.background_original_img = pygame.transform.scale(pygame.image.load("images/background.png"), (self.display.current_w * 0.8, self.display.current_h))
+        self.background_original_img = pygame.transform.scale_by(pygame.image.load("images/background.png"), 3)
+        self.mouse = (0, 0)
+        self.selected = (False, None)
+
 
 
 
@@ -37,8 +50,9 @@ class Animal:
         self.angle = rotation_vel
         self.x, self.y = self.START_POS
         self.acceleration = 0.1
-
+        self.rect = pygame.Rect(self.x, self.y, self.img.get_size()[0], self.img.get_size()[1])
         self.health = 100
+        self.name = ""
     dt = 0
 
     def draw(self, screen, position):
@@ -71,6 +85,9 @@ class Animal:
             if self.y >= Animal.cage[1] - 10:
                 self.y -= 1
 
+        self.rect = pygame.Rect(self.x, self.y, self.img.get_size()[0], self.img.get_size()[1])
+
+
     def slowObject(self):
         self.vel = max(self.vel - self.acceleration / 2, 0)
         self.move()
@@ -89,25 +106,15 @@ class Prey(Animal):
     IMG = pygame.transform.rotate(IMG, 90)
     START_POS = (0, 350)
 
-    def eat(self, predators):
-        for predator in predators:
-            if predator.x <= self.x <= predator.x + predator.IMG.get_size()[0] and predator.y <= self.y <= predator.y + \
-                    predator.IMG.get_size()[
-                        1] \
-                    or predator.x <= self.x + predator.IMG.get_size()[0] <= predator.x + predator.IMG.get_size()[
-                0] and predator.y <= self.y <= predator.y + predator.IMG.get_size()[1] \
-                    or predator.x <= self.x <= predator.x + predator.IMG.get_size()[0] and predator.y <= self.y + \
-                    predator.IMG.get_size()[
-                        1] <= predator.y + predator.IMG.get_size()[1] \
-                    or predator.x <= self.x + predator.IMG.get_size()[0] <= predator.x + predator.IMG.get_size()[
-                0] and predator.y <= self.y + predator.IMG.get_size()[1] <= predator.y + predator.IMG.get_size()[1]:
-
-                predator.health -= 20
-                if predator.health == 0:
-                    predators.remove(predator)
-            # if self.IMG.get_rect().collidepoint(prey.x, prey.y):
-            #     preys.remove(prey)
-
+    def eat(self, predators, init):
+        index = pygame.Rect.collidelist(self.rect, init.predators_rect)
+        if index != -1:
+            predators[index].health -= 20
+            if predators[index].health == 0:
+                if predators[index] == init.selected[1]:
+                    init.selected = False, None
+                predators.pop(index)
+                init.predators_rect.pop(index)
         return predators
 
 
@@ -115,27 +122,19 @@ class Predator(Animal):
     IMG = scale_image(pygame.image.load('images/red_object_FILL.png'), 0.2)
     IMG = pygame.transform.rotate(IMG, 90)
     START_POS = (350, 350)
-
-    def eat(self, preys):
-        for prey in preys:
-            if prey.x <= self.x <= prey.x + prey.IMG.get_size()[0] and prey.y <= self.y <= prey.y + prey.IMG.get_size()[
-                1] \
-                    or prey.x <= self.x + prey.IMG.get_size()[0] <= prey.x + prey.IMG.get_size()[
-                0] and prey.y <= self.y <= prey.y + prey.IMG.get_size()[1] \
-                    or prey.x <= self.x <= prey.x + prey.IMG.get_size()[0] and prey.y <= self.y + prey.IMG.get_size()[
-                1] <= prey.y + prey.IMG.get_size()[1] \
-                    or prey.x <= self.x + prey.IMG.get_size()[0] <= prey.x + prey.IMG.get_size()[
-                0] and prey.y <= self.y + prey.IMG.get_size()[1] <= prey.y + prey.IMG.get_size()[1]:
-
-                prey.health -= 50
-                self.angle += 180
-                self.move()
-                self.vel = 0
-                self.angle -= 180
-
-                if prey.health == 0:
-                    preys.remove(prey)
-            # if self.IMG.get_rect().collidepoint(prey.x, prey.y):
-            #     preys.remove(prey)
-
+    def eat(self, preys, init):
+        index = pygame.Rect.collidelist(self.rect, init.preys_rect)
+        if index != -1:
+            preys[index].health -= 50
+            self.angle += 180
+            self.move()
+            self.vel = 0
+            self.angle -= 180
+            if preys[index].health == 0:
+                if preys[index] == init.selected[1]:
+                    init.selected = False, None
+                preys.pop(index)
+                init.preys_rect.pop(index)
         return preys
+
+
