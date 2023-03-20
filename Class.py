@@ -17,7 +17,7 @@ class Init:
         self.display = pygame.display.Info()
         self.exit_btn = pygame.image.load('images/exist_btn.png')
         self.menu_background = None
-        self.data = None
+        self.data = ["50", "0.5", "15", "50", "1", "15", "3"]
         self.preys_rect = []
         self.predators_rect = []
         self.right_panel_state = True
@@ -30,9 +30,15 @@ class Init:
         self.background_original_img = pygame.transform.scale_by(pygame.image.load("images/background.png"), 3)
         self.mouse = (0, 0)
         self.selected = (False, None)
+        self.camera_rect = None
 
 
-
+class background_objects_class:
+    def __init__(self):
+        self.speed_x = random.uniform(0, 1)
+        self.speed_y = random.uniform(0, 1)
+        self.direction = 1
+        self.angel = random.uniform(0, 360)
 
 class Position:
     def __init__(self):
@@ -41,7 +47,7 @@ class Position:
 
 
 class Animal:
-    cage = 0, 0  # static
+    cage = 0, 0
 
     def __init__(self, max_vel, rotation_vel):
         self.img = self.IMG
@@ -104,7 +110,7 @@ class Animal:
 class Prey(Animal):
     IMG = scale_image(pygame.image.load('images/green_object_FILL.png'), 0.2)
     IMG = pygame.transform.rotate(IMG, 90)
-    START_POS = (0, 350)
+    START_POS = (350, 350)
 
     def eat(self, predators, init):
         index = pygame.Rect.collidelist(self.rect, init.predators_rect)
@@ -121,7 +127,7 @@ class Prey(Animal):
 class Predator(Animal):
     IMG = scale_image(pygame.image.load('images/red_object_FILL.png'), 0.2)
     IMG = pygame.transform.rotate(IMG, 90)
-    START_POS = (350, 350)
+    START_POS = (0, 0)
     def eat(self, preys, init):
         index = pygame.Rect.collidelist(self.rect, init.preys_rect)
         if index != -1:

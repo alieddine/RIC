@@ -1,7 +1,8 @@
 import random
 import sys
-
+import math
 import pygame
+from pygame.locals import Rect
 
 
 def scale_image(img, factor):
@@ -80,16 +81,27 @@ def draw(screen, init):
     screen.blit(default_text, (init.buttons_position["minus_button"][0] + 30, init.display.current_h * 0.1))
     init.buttons_position["default_button"] = (init.buttons_position["minus_button"][0] + 30, init.display.current_h * 0.1)
 
+def map_panel(screen , preys, predators, cage, init, position):
+    map_width = screen.get_width() * 0.2
+    map_height = screen.get_height() * 0.2
+    panel = pygame.Surface((map_width, map_height))
 
-def map_panel(screen , preys, predators, cage):
-    panel = pygame.Surface((screen.get_width() * 0.2, screen.get_height() * 0.2))
     panel.set_alpha(128)
     panel.fill((0, 0, 0))
-    screen.blit(panel, (0, screen.get_height() - screen.get_height() * 0.2))
     for prey in preys:
         pygame.draw.line(screen, (0, 255, 0), (((prey.x * 100) / cage[0]) * (screen.get_width() * 0.2) / 100, screen.get_height() - screen.get_height() * 0.2 + (((prey.y * 100) / cage[1]) * (screen.get_height() * 0.2)) / 100), ((((prey.x * 100) / cage[0]) * (screen.get_width() * 0.2)) / 100, screen.get_height() - screen.get_height() * 0.2 + (((prey.y * 100) / cage[1]) * (screen.get_height() * 0.2)) / 100), 2)
     for predator in predators:
         pygame.draw.line(screen, (255, 0, 0), (((predator.x * 100) / cage[0]) * (screen.get_width() * 0.2) / 100, screen.get_height() - screen.get_height() * 0.2 + (((predator.y * 100) / cage[1]) * (screen.get_height() * 0.2)) / 100), ((((predator.x * 100) / cage[0]) * (screen.get_width() * 0.2)) / 100, screen.get_height() - screen.get_height() * 0.2 + (((predator.y * 100) / cage[1]) * (screen.get_height() * 0.2)) / 100), 2)
+    x_100_percent = position.x / cage[0] / 0.01
+    y_100_percent = position.y / cage[1] / 0.01
+    width_100_percent = screen.get_width() / cage[0] / 0.01
+    height_100_percent = screen.get_height() / cage[1] / 0.01
+    x_new = x_100_percent * map_width / 100
+    y_new = y_100_percent * map_height / 100
+    width_new = width_100_percent * map_width / 100
+    height_new = height_100_percent * map_height / 100
+    pygame.draw.rect(panel, (255, 0, 0), (x_new, y_new, width_new, height_new), 2, 2)
+    screen.blit(panel, (0, screen.get_height() - screen.get_height() * 0.2))
 
 
 def data_panel(screen, selected, cage):
@@ -138,30 +150,71 @@ def set_preys_predators(init):
 
 
 def menu_panel(screen, init):
-    menu_background = pygame.image.load('images/menu_background.jpg')
-    menu_background = pygame.transform.scale(menu_background, (init.display.current_w, init.display.current_h))
-    init.menu_background = menu_background
+    from Class import background_objects_class
+    # menu_background = pygame.image.load('images/menu_background.jpg')
+    # menu_background = pygame.transform.scale(menu_background, (init.display.current_w, init.display.current_h))
+    # init.menu_background = menu_background
 
     title = init.font3.render("Prey VS Predators", True, (255, 255, 255))
     prey_title = init.font3.render("Prey", True, (255, 255, 255))
     predator_title = init.font3.render("Predator", True, (255, 255, 255))
     moving_speed = init.font2.render("moving speed : ", True, (255, 255, 255))
     rotation_speed = init.font2.render("rotation speed : ", True, (255, 255, 255))
+    map_size = init.font2.render("map size : ", True, (255, 255, 255))
     population_number = init.font2.render("population number : ", True, (255, 255, 255))
     writing_in = -1
-    writing_this = ["50", "0.5", "15", "50", "1", "15"]
+    writing_this = init.data
+    # background_objects_rect = []
+    # background_objects = []
+    # for i in range(50):
+    #     background_objects_rect.append(Rect(random.randint(100, init.display.current_w - 100), random.randint(100, init.display.current_h - 100), random.randint(0, 70), random.randint(0, 70)))
+    #     obj = background_objects_class()
+    #     background_objects.append(obj)
 
     while True:
+        # screen.blit(menu_background, (0, 0))
+        screen.fill((40, 40, 40))
+        # for i in range(len(background_objects)):
+        #     if init.display.current_w - 70 <= background_objects_rect[i].left:
+        #         background_objects_rect[i].left = 70
+        #     elif 70 >= background_objects_rect[i].right:
+        #             background_objects_rect[i].left = init.display.current_w - 70
+        #     elif init.display.current_h - 70 <= background_objects_rect[i].top :
+        #         background_objects_rect[i].top = 70
+        #     elif 70 >= background_objects_rect[i].bottom:
+        #         background_objects_rect[i].top = init.display.current_h - 70
+        #     if i != len(background_objects):
+        #         index = pygame.Rect.collidelist(background_objects_rect[i], background_objects_rect[i+1:])
+        #
+        #         if index != -1:
+        #             background_objects[i].angel = random.uniform(-360, 360)
+        #             background_objects[i].direction *= -1
+        #
+        #
+        #     background_objects[i].speed_x = random.uniform(0, 2)
+        #     background_objects[i].speed_y = random.uniform(0, 2)
+        #     if background_objects[i].speed_x == 0 and background_objects[i].speed_y == 0:
+        #         background_objects[i].speed_x = random.uniform(1, 2)
+        #         background_objects[i].speed_y = random.uniform(1, 2)
+        #     radians = math.radians(background_objects[i].angel)
+        #     vertical = math.cos(radians) * background_objects[i].speed_x
+        #     horizontal = math.sin(radians) * background_objects[i].speed_y
+        #     background_objects_rect[i].left -= vertical * background_objects[i].direction
+        #     background_objects_rect[i].top -= horizontal * background_objects[i].direction
+        #     pygame.draw.rect(screen, (255, 255, 255), background_objects_rect[i], 2)
+
+
         population_number_text_prey = init.font2.render(writing_this[0], True, (255, 255, 255))
         moving_speed_text_prey = init.font2.render(writing_this[1], True, (255, 255, 255))
         rotation_speed_text_prey = init.font2.render(writing_this[2], True, (255, 255, 255))
         population_number_text_predator = init.font2.render(writing_this[3], True, (255, 255, 255))
         moving_speed_text_predator = init.font2.render(writing_this[4], True, (255, 255, 255))
         rotation_speed_text_predator = init.font2.render(writing_this[5], True, (255, 255, 255))
+        map_size_text = init.font2.render(writing_this[6], True, (255, 255, 255))
+
 
         mouse = pygame.mouse.get_pos()
-        screen.blit(menu_background, (0, 0))
-        screen.fill((40, 40, 40))
+
         menu_panel = pygame.Surface((init.display.current_w * 0.8, init.display.current_h * 0.8))
         menu_panel.set_alpha(150)
 
@@ -192,6 +245,11 @@ def menu_panel(screen, init):
         screen.blit(rotation_speed, (init.display.current_w * 0.55, init.display.current_h * 0.4 + init.font2.size("a")[1] * 4))
         pygame.draw.rect(screen, (255, 255, 255), (init.display.current_w * 0.70, init.display.current_h * 0.4 + init.font2.size("a")[1] * 4, 100, init.font2.size("a")[1]), 2, 2)
         screen.blit(rotation_speed_text_predator, (init.display.current_w * 0.70 + 5, init.display.current_h * 0.4 + init.font2.size("a")[1] * 4))
+
+        screen.blit(map_size, (init.display.current_w * 0.15, init.display.current_h * 0.82))
+        pygame.draw.rect(screen, (255, 255, 255), (init.display.current_w * 0.23 - 2, init.display.current_h * 0.82 , 100, init.font2.size("a")[1] + 3), 2, 2)
+        screen.blit(map_size_text, (init.display.current_w * 0.23 + 5, init.display.current_h * 0.82 + 1))
+
 
         if init.display.current_w * 0.82 - 5 <= mouse[0] <= init.display.current_w * 0.82 - 5 + init.font2.size("Start")[0] + 20 and init.display.current_h * 0.82 <= mouse[1] <= init.display.current_h * 0.82 + init.font2.size("Start")[1] + 10:
             start_text = init.font2.render("Start", True, (255, 255, 255))
@@ -234,12 +292,13 @@ def menu_panel(screen, init):
                     writing_in = 4
                 elif init.display.current_w * 0.70 <= mouse[0] <= init.display.current_w * 0.70 + 100 and init.display.current_h * 0.4 + init.font2.size("a")[1] * 4 <= mouse[1] <= init.display.current_h * 0.4 + init.font2.size("a")[1] * 4 + init.font2.size("a")[1]:
                     writing_in = 5
+                elif init.display.current_w * 0.23 - 2 <= mouse[0] <= init.display.current_w * 0.23 + 100 and init.display.current_h * 0.82 <= mouse[1] <= init.display.current_h * 0.82 + init.font2.size("a")[1] + 3:
+                    writing_in = 6
                 elif init.display.current_w * 0.82 - 5 <= mouse[0] <= init.display.current_w * 0.82 - 5 + init.font2.size("Start")[0] + 20 and init.display.current_h * 0.82 <= mouse[1] <= init.display.current_h * 0.82 + init.font2.size("Start")[1] + 10:
                     init.menu = False
                     init.data = writing_this
-                    return
+                    return True
                 elif init.display.current_w * 0.75 - 5 <= mouse[0] <= init.display.current_w * 0.75 - 5 + init.font2.size("Start")[0] + 20 and init.display.current_h * 0.82 <= mouse[1] <= init.display.current_h * 0.82 + init.font2.size("Start")[1] + 10:
-
                     sys.exit()
                 else:
                     writing_in = -1
@@ -247,7 +306,8 @@ def menu_panel(screen, init):
                 if event.key == pygame.K_RETURN and writing_in != -1:
                     writing_in = -1
                 if event.key == pygame.K_ESCAPE:
-                    sys.exit()
+                    init.menu = False
+                    return False
                 elif event.key == pygame.K_BACKSPACE and writing_in != -1:
                     writing_this[writing_in] = writing_this[writing_in][:-1]
                 elif writing_in != -1 and len(writing_this[writing_in]) < 8:
@@ -255,6 +315,7 @@ def menu_panel(screen, init):
         if writing_in != -1:
             if writing_in == 0:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 - 2, init.display.current_h * 0.4 - 2, 100, init.font2.size("a")[1] + 3), 2, 2)
+                pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 + 5 + init.font2.size(writing_this[0])[0], init.display.current_h * 0.4 + init.font2.size("a")[1], init.font2.size("a")[0], 2) ,2)
             elif writing_in == 1:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 - 2, init.display.current_h * 0.4 + init.font2.size("a")[1] * 2 - 2, 100, init.font2.size("a")[1] + 3), 2, 2)
             elif writing_in == 2:
@@ -265,7 +326,9 @@ def menu_panel(screen, init):
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.70, init.display.current_h * 0.4 + init.font2.size("a")[1] * 2, 100, init.font2.size("a")[1]), 2, 2)
             elif writing_in == 5:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.70, init.display.current_h * 0.4 + init.font2.size("a")[1] * 4, 100, init.font2.size("a")[1]), 2, 2)
-        screen.blit(init.predator_original_img, (500, 500))
+            elif writing_in == 6:
+                pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.23 - 2, init.display.current_h * 0.82, 100, init.font2.size("a")[1] + 3), 2, 2)
+
         pygame.display.update()
         init.clock.tick(500)
 
@@ -278,8 +341,18 @@ def check_eat(preys, predators, init):
     for predator in predators:
         init.predators_rect.append(predator.rect)
 
-    for predator in predators:
-        preys = predator.eat(preys, init)
-    for prey in preys:
+    for i in range(len(predators) - 1):
+        preys = predators[i].eat(preys, init)
+        index = pygame.Rect.collidelistall(init.predators_rect[i], init.predators_rect)
+        if index != None:
+            for elemenet in index:
+                if elemenet != i:
+                    predators[i].vel = -0.5
+    for i in range(len(preys) - 1):
         predators = prey.eat(predators, init)
+        index = pygame.Rect.collidelistall(init.preys_rect[i], init.preys_rect)
+        if index != None:
+            for elemenet in index:
+                if elemenet != i:
+                    preys[i].vel = -0.5
     return preys, predators

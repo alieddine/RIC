@@ -18,12 +18,13 @@ def main():
     prev_time = time.time()
     dt = 0
     TARGET_FPS = 60
-    background_image = pygame.image.load('images/background.png')
+    background_image = pygame.image.load('images/background.png').convert()
     # background_image = pygame.transform.scale(background_image, (init.display.current_w * 0.8, init.display.current_h))
-    background_image = pygame.transform.scale_by(background_image, 4)
+    background_image = pygame.transform.scale_by(background_image, 3).convert()
+
 
     pause = False
-    predator1 = Predator(2, 5)
+    predator1 = Predator(30, 5)
     img = scale_image(pygame.image.load("images/test_object.png"), 0.2)
     predator1.img = pygame.transform.rotate(img, 90)
 
@@ -42,14 +43,22 @@ def main():
     camera_rect = pygame.Rect((camera_borders['left'], camera_borders['top'], w, h))
 
     while True:
+        init.camera_rect = camera_rect
 
-        Animal.cage = background_image.get_size()
         moving = False
 
         if init.menu:
-            menu_panel(screen, init)
-            preys, predators = set_preys_predators(init)
-            prev_time = time.time()
+            rest = menu_panel(screen, init)
+
+            if rest:
+                prev_time = time.time()
+                init.background_original_img = pygame.transform.scale_by(pygame.image.load("images/background.png"), float(init.data[6])).convert()
+                background_image = init.background_original_img
+                Animal.cage = background_image.get_size()
+                zooming_default = True
+                position.x, position.y = 0, 0
+                preys, predators = set_preys_predators(init)
+        Animal.cage = background_image.get_size()
         mouse = pygame.mouse.get_pos()
         init.mouse = mouse
         now = time.time()
@@ -91,9 +100,23 @@ def main():
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    sys.exit()
+                    init.menu = True
+
                 if event.key == pygame.K_p:
                     pause = not pause
+                if event.key == pygame.K_LEFT:
+                    camera_rect.left = camera_rect.left - 100
+                    position.x = camera_rect.left - camera_borders['left']
+                elif event.key == pygame.K_RIGHT:
+                    camera_rect.left = camera_rect.left + 100
+                    position.x = camera_rect.left - camera_borders['left']
+                elif event.key == pygame.K_UP:
+                    camera_rect.top = camera_rect.top - 100
+                    position.y = camera_rect.top - camera_borders['top']
+                elif event.key == pygame.K_DOWN:
+                    camera_rect.top = camera_rect.top + 100
+                    position.y = camera_rect.top - camera_borders['top']
+                    # position.y = camera_rect.top - camera_borders['top']
         if pause: continue
         keys = pygame.key.get_pressed()
 
@@ -135,8 +158,9 @@ def main():
 
             background_image = init.background_original_img
 
-        predator1.draw(screen, position)
         screen.blit(background_image, (0 - position.x, 0 - position.y))
+
+        predator1.draw(screen, position)
 
         # threads = []
         for prey in preys:
@@ -184,8 +208,7 @@ def main():
         for prey in preys:
             prey.draw(screen)
         """
-        pygame.draw.rect(screen, (255, 255, 255), (0 - position.x, 0 - position.y, Animal.cage[0], Animal.cage[1]), 2,
-                         2)
+        pygame.draw.rect(screen, (255, 255, 255), (0 - position.x, 0 - position.y, Animal.cage[0], Animal.cage[1]), 2, 2)
 
         #  old camera
         # if init.selected[0]:
@@ -210,17 +233,18 @@ def main():
             data_panel(screen, init.selected[1], Animal.cage)
             pygame.draw.rect(screen, (0, 0, 0), (init.selected[1].x - position.x, init.selected[1].y - position.y, init.selected[1].IMG.get_width() * init.zoom, init.zoom * init.selected[1].IMG.get_height()), int (2 * init.zoom), 3)
 
-        map_panel(screen, preys, predators, Animal.cage)
+        map_panel(screen, preys, predators, Animal.cage, init, position)
         init.clock.tick(500)
 
         draw(screen, init)
         pygame.display.update()
-        zooming_in = False
-        zooming_out = False
+
         if zooming_default:
             init.zoom = 1
             zooming_default = False
 
+        zooming_in = False
+        zooming_out = False
 
 if __name__ == '__main__':
     main()
