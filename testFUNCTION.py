@@ -1,7 +1,7 @@
 import random
 import sys
 import math
-import pygame
+import pygame, time
 from pygame.locals import Rect
 
 
@@ -27,11 +27,62 @@ def draw(screen, init):
     screen.blit(right_panel, (init.display.current_w * 0.8, 0))
     pygame.draw.line(screen, (255, 255, 255), (init.display.current_w * 0.8, 0), (init.display.current_w * 0.8, init.display.current_h), 2)
     pygame.draw.line(screen, (255, 255, 255), (init.display.current_w * 0.8, init.display.current_h * 0.3), (init.display.current_w, init.display.current_h * 0.3), 2)
+
     if init.right_panel_state:
         right_panel = pygame.Surface((init.display.current_w * 0.2, init.display.current_h * 0.7))
         right_panel.fill((100, 0, 0))
         right_panel.set_alpha(128)
+        if init.show_hide_graph:
+            now = time.time()
+            second = now - init.prev_time
+            graph_prey = pygame.Surface((right_panel.get_width() * 0.8, right_panel.get_height() * 0.3))
+            graph_prey.fill((0, 0, 0))
+            prey_text_number = init.font2.render(f"Prey  :  {len(init.preys_rect)}", True, (255, 255, 255))
+            graph_prey.blit(prey_text_number, (5, 5))
+            pygame.draw.rect(graph_prey, (255, 255, 255), (0, 0, graph_prey.get_width(), graph_prey.get_height()), 2, 2)
+            pygame.draw.line(graph_prey, (255, 255, 255), (0, init.font2.size("A")[1] + 7), (graph_prey.get_width(), init.font2.size("A")[1] + 7), 2)
+            max_changed = False
+            if second >= 0.5:
+                init.half_seceond_passed = not init.half_seceond_passed
+                init.prev_time = now
+
+                if init.max_preys < len(init.preys_rect):
+                    init.m = init.max_preys
+                    max_changed = True
+                    init.max_preys = len(init.preys_rect)
+            if init.half_seceond_passed:
+                size_preys = (init.font2.size("A")[1] + 9) + (graph_prey.get_height() * 0.9) - ((len(init.preys_rect) / init.max_preys) * (graph_prey.get_height() * 0.9))
+                init.graph_prey_lines.append([(graph_prey.get_width() - 2, graph_prey.get_height() - 2), (graph_prey.get_width() - 2, size_preys -2), len(init.preys_rect)])
+                for element in init.graph_prey_lines:
+                    if max_changed:
+                        size_preys = (init.font2.size("A")[1] + 9) + (graph_prey.get_height() * 0.9) - (
+                                    (element[2] / init.max_preys) * (graph_prey.get_height() * 0.9)) - 2
+                        element[0] = element[0][0] - 2, element[0][1]
+                        element[1] = element[1][0] - 2, size_preys
+                    else:
+                        element[0] = element[0][0] - 2, element[0][1]
+                        element[1] = element[1][0] - 2, element[1][1]
+                if init.graph_prey_lines[0][0][0] == 0:
+                    init.graph_prey_lines.pop(0)
+                init.half_seceond_passed = False
+
+            if len(init.graph_prey_lines) != 0:
+                for element in init.graph_prey_lines:
+                    pygame.draw.line(graph_prey, (0, 255, 0), element[0], element[1], 2)
+            right_panel.blit(graph_prey, (right_panel.get_width() * 0.1, right_panel.get_height() * 0.6))
+
+            pygame.draw.line(right_panel, (255, 255, 255),(0, right_panel.get_height() * 0.5), (right_panel.get_width(), right_panel.get_height() * 0.5), 2)
+
+            graph_predator = pygame.Surface((right_panel.get_width() * 0.8, right_panel.get_height() * 0.3))
+            graph_predator.fill((0, 8, 0))
+            predators_text_number = init.font2.render(f"Predator  :  {len(init.predators_rect)}", True, (255, 255, 255))
+            graph_predator.blit(predators_text_number, (5, 5))
+            right_panel.blit(graph_predator, (right_panel.get_width() * 0.1, right_panel.get_height() * 0.1))
+
+
         screen.blit(right_panel, (init.display.current_w * 0.8, init.display.current_h * 0.3))
+
+
     screen.blit(init.name_text, (init.display.current_w - (init.name_text.get_width() + 35), 10))
     screen.blit(init.exit_btn, (init.display.current_w - 30, 10))
     screen.blit(fps_text, (10, 10))
@@ -61,24 +112,28 @@ def draw(screen, init):
         if init.buttons_position["cancel_selected"][0] <= init.mouse[0] <= init.buttons_position["cancel_selected"][0] + 15 and init.buttons_position["cancel_selected"][1] <= init.mouse[1] <= init.buttons_position["cancel_selected"][1] + 15:
             cancel_button = pygame.image.load("images/cancel_button_red.png")
             screen.blit(cancel_button, (init.display.current_w * 0.81 + init.font2.size(s_text)[0] + 10,
-                                        init.display.current_h * 0.1 + init.font2.size("A")[1] + 15))
+                                        init.display.current_h * 0.1 + init.font2.size("A")[1] + 5))
 
         else:
             cancel_button = pygame.image.load("images/cancel_button.png")
             screen.blit(cancel_button, (init.display.current_w * 0.81 + init.font2.size(s_text)[0] + 10,
-                                        init.display.current_h * 0.1 + init.font2.size("A")[1] + 15))
+                                        init.display.current_h * 0.1 + init.font2.size("A")[1] + 5))
 
 
     else:
         s_text = f'Selected  : None'
         selected_text = init.font2.render(s_text, True, (180, 180, 180))
-    screen.blit(selected_text, (init.display.current_w * 0.81, init.display.current_h * 0.1 + init.font2.size("A")[1] + 10))
-    init.buttons_position["cancel_selected"] = (init.display.current_w * 0.81 + init.font2.size(s_text)[0] + 10, init.display.current_h * 0.1 + init.font2.size("A")[1] + 15)
-
-
-
-
+    screen.blit(selected_text, (init.display.current_w * 0.81, init.display.current_h * 0.1 + init.font2.size("A")[1] * 1))
+    init.buttons_position["cancel_selected"] = (init.display.current_w * 0.81 + init.font2.size(s_text)[0] + 10, init.display.current_h * 0.1 + init.font2.size("A")[1] + 5)
+    graph_text = init.font2.render("graphs : ", True, (255, 255, 255))
+    if init.show_hide_graph: graph_text_show_hide = init.font2.render("show", True, (255, 0, 0))
+    else: graph_text_show_hide = init.font2.render("hide", True, (255, 255, 255))
+    screen.blit(graph_text, (init.display.current_w * 0.81 ,
+                                init.display.current_h * 0.1 + init.font2.size("A")[1] * 2))
+    screen.blit(graph_text_show_hide, (init.display.current_w * 0.81 + init.font2.size("show graph : ")[0] + 5,
+                             init.display.current_h * 0.1 + init.font2.size("A")[1] * 2))
     screen.blit(default_text, (init.buttons_position["minus_button"][0] + 30, init.display.current_h * 0.1))
+    init.buttons_position["show_hide_graph"] = (init.display.current_w * 0.81 + init.font2.size("show graph : ")[0] + 5, init.display.current_h * 0.1 + init.font2.size("A")[1] * 2)
     init.buttons_position["default_button"] = (init.buttons_position["minus_button"][0] + 30, init.display.current_h * 0.1)
 
 def map_panel(screen , preys, predators, cage, init, position):
@@ -136,18 +191,35 @@ def set_preys_predators(init):
     predators = []
     for e in range(int(init.data[0])):
         prey = Class.Prey(float(init.data[1]), int(init.data[2]))
-        prey.x = random.randrange(Class.Animal.cage[0])
-        prey.y = random.randrange(Class.Animal.cage[1])
+        prey.x = random.randrange(init.cage[0])
+        prey.y = random.randrange(init.cage[1])
         prey.name = "Prey_" + str(e)
         preys.append(prey)
     for e in range(int(init.data[3])):
         predator = Class.Predator(int(init.data[4]), int(init.data[5]))
-        predator.x = random.randrange(Class.Animal.cage[0])
-        predator.y = random.randrange(Class.Animal.cage[1])
+        predator.x = random.randrange(init.cage[0])
+        predator.y = random.randrange(init.cage[1])
         predator.name = "Predator_" + str(e)
         predators.append(predator)
     return preys, predators
 
+def spawn_more_obj(init, preys, predators):
+    import Class
+    for e in range(10):
+        prey = Class.Prey(float(init.data[1]), int(init.data[2]))
+        prey.x = random.randrange(init.cage[0])
+        prey.y = random.randrange(init.cage[1])
+        prey.name = "Prey_" + str(e + int(init.data[0]))
+        init.data[0] = str(int(init.data[0]) + 1)
+        preys.append(prey)
+    for e in range(10):
+        predator = Class.Predator(int(init.data[4]), int(init.data[5]))
+        predator.x = random.randrange(init.cage[0])
+        predator.y = random.randrange(init.cage[1])
+        predator.name = "Predator_" + str(e + int(init.data[0]))
+        init.data[0] = str(int(init.data[0]) + 1)
+        predators.append(predator)
+    return preys, predators
 
 def menu_panel(screen, init):
     from Class import background_objects_class
@@ -170,7 +242,8 @@ def menu_panel(screen, init):
     #     background_objects_rect.append(Rect(random.randint(100, init.display.current_w - 100), random.randint(100, init.display.current_h - 100), random.randint(0, 70), random.randint(0, 70)))
     #     obj = background_objects_class()
     #     background_objects.append(obj)
-
+    prev_time = time.time()
+    half_seceond_passed = False
     while True:
         # screen.blit(menu_background, (0, 0))
         screen.fill((40, 40, 40))
@@ -203,7 +276,11 @@ def menu_panel(screen, init):
         #     background_objects_rect[i].top -= horizontal * background_objects[i].direction
         #     pygame.draw.rect(screen, (255, 255, 255), background_objects_rect[i], 2)
 
-
+        now = time.time()
+        second = now - prev_time
+        if second >= 0.3:
+            half_seceond_passed = not half_seceond_passed
+            prev_time = now
         population_number_text_prey = init.font2.render(writing_this[0], True, (255, 255, 255))
         moving_speed_text_prey = init.font2.render(writing_this[1], True, (255, 255, 255))
         rotation_speed_text_prey = init.font2.render(writing_this[2], True, (255, 255, 255))
@@ -297,6 +374,8 @@ def menu_panel(screen, init):
                 elif init.display.current_w * 0.82 - 5 <= mouse[0] <= init.display.current_w * 0.82 - 5 + init.font2.size("Start")[0] + 20 and init.display.current_h * 0.82 <= mouse[1] <= init.display.current_h * 0.82 + init.font2.size("Start")[1] + 10:
                     init.menu = False
                     init.data = writing_this
+                    init.max_preys = int(writing_this[0])
+                    init.m = init.max_preys
                     return True
                 elif init.display.current_w * 0.75 - 5 <= mouse[0] <= init.display.current_w * 0.75 - 5 + init.font2.size("Start")[0] + 20 and init.display.current_h * 0.82 <= mouse[1] <= init.display.current_h * 0.82 + init.font2.size("Start")[1] + 10:
                     sys.exit()
@@ -307,27 +386,37 @@ def menu_panel(screen, init):
                     writing_in = -1
                 if event.key == pygame.K_ESCAPE:
                     init.menu = False
-                    return False
+                    if init.cage[0] == 0:
+                        sys.exit()
+                    else:
+                        return False
                 elif event.key == pygame.K_BACKSPACE and writing_in != -1:
                     writing_this[writing_in] = writing_this[writing_in][:-1]
-                elif writing_in != -1 and len(writing_this[writing_in]) < 8:
+                elif writing_in != -1 and len(writing_this[writing_in]) < 7:
                     writing_this[writing_in] += event.unicode
         if writing_in != -1:
             if writing_in == 0:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 - 2, init.display.current_h * 0.4 - 2, 100, init.font2.size("a")[1] + 3), 2, 2)
-                pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 + 5 + init.font2.size(writing_this[0])[0], init.display.current_h * 0.4 + init.font2.size("a")[1], init.font2.size("a")[0], 2) ,2)
+                if half_seceond_passed: pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 + 5 + init.font2.size(writing_this[0])[0], init.display.current_h * 0.4 + init.font2.size("a")[1] - 4, init.font2.size("a")[0], 2) ,2)
             elif writing_in == 1:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 - 2, init.display.current_h * 0.4 + init.font2.size("a")[1] * 2 - 2, 100, init.font2.size("a")[1] + 3), 2, 2)
+                if half_seceond_passed: pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 + 5 + init.font2.size(writing_this[1])[0], init.display.current_h * 0.4 + init.font2.size("a")[1] * 3 - 4, init.font2.size("a")[0], 2) ,2)
             elif writing_in == 2:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 - 2, init.display.current_h * 0.4 + init.font2.size("a")[1] * 4 - 2, 100, init.font2.size("a")[1] + 3), 2, 2)
+                if half_seceond_passed: pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.3 + 5 + init.font2.size(writing_this[2])[0], init.display.current_h * 0.4 + init.font2.size("a")[1] * 5 - 4, init.font2.size("a")[0], 2) ,2)
             elif writing_in == 3:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.70, init.display.current_h * 0.4, 100, init.font2.size("a")[1]), 2, 2)
+                if half_seceond_passed: pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.70 + 5 + init.font2.size(writing_this[3])[0], init.display.current_h * 0.4 + init.font2.size("a")[1] - 4, init.font2.size("a")[0], 2) ,2)
             elif writing_in == 4:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.70, init.display.current_h * 0.4 + init.font2.size("a")[1] * 2, 100, init.font2.size("a")[1]), 2, 2)
+                if half_seceond_passed: pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.70 + 5 + init.font2.size(writing_this[4])[0], init.display.current_h * 0.4 + init.font2.size("a")[1] * 3 - 4, init.font2.size("a")[0], 2) ,2)
             elif writing_in == 5:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.70, init.display.current_h * 0.4 + init.font2.size("a")[1] * 4, 100, init.font2.size("a")[1]), 2, 2)
+                if half_seceond_passed: pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.7 + 5 + init.font2.size(writing_this[5])[0], init.display.current_h * 0.4 + init.font2.size("a")[1] * 5 - 4, init.font2.size("a")[0], 2) ,2)
             elif writing_in == 6:
                 pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.23 - 2, init.display.current_h * 0.82, 100, init.font2.size("a")[1] + 3), 2, 2)
+                if half_seceond_passed: pygame.draw.rect(screen, (255, 0, 0), (init.display.current_w * 0.23 + 5 + init.font2.size(writing_this[6])[0], init.display.current_h * 0.82 + init.font2.size("a")[1] - 4, init.font2.size("a")[0], 2) ,2)
+
 
         pygame.display.update()
         init.clock.tick(500)

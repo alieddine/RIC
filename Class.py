@@ -31,6 +31,13 @@ class Init:
         self.mouse = (0, 0)
         self.selected = (False, None)
         self.camera_rect = None
+        self.show_hide_graph = False
+        self.graph_prey_lines = []
+        self.prev_time = time.time()
+        self.half_seceond_passed = False
+        self.max_preys = 0
+        self.m = 0
+    cage = 0, 0
 
 
 class background_objects_class:
@@ -47,7 +54,7 @@ class Position:
 
 
 class Animal:
-    cage = 0, 0
+
 
     def __init__(self, max_vel, rotation_vel):
         self.img = self.IMG
@@ -72,8 +79,7 @@ class Animal:
         self.move()
 
     def move(self):
-
-        if 0 <= self.x <= Animal.cage[0] - 10 and 0 <= self.y <= Animal.cage[1] - 10:
+        if 0 <= self.x <= Init.cage[0] - 10 and 0 <= self.y <= Init.cage[1] - 10:
             radians = math.radians(self.angle)
             vertical = math.cos(radians) * self.vel
             horizontal = math.sin(radians) * self.vel
@@ -83,12 +89,12 @@ class Animal:
         else:
             if self.x <= 0:
                 self.x += 1
-            if self.x >= Animal.cage[0] - 10:
+            if self.x >= Init.cage[0] - 10:
                 self.x -= 1
 
             if self.y <= 0:
                 self.y += 1
-            if self.y >= Animal.cage[1] - 10:
+            if self.y >= Init.cage[1] - 10:
                 self.y -= 1
 
         self.rect = pygame.Rect(self.x, self.y, self.img.get_size()[0], self.img.get_size()[1])

@@ -40,7 +40,6 @@ while running:
     graph_background = pygame.Surface((400, 200))
     graph_background.set_alpha(128)
     graph_background.fill((0, 8, 0, 20))
-    screen.blit(graph_background, (50, 50))
     for element in graph_list:
         pygame.draw.line(graph_background, (180, 0, 0), element[0], element[1], 2)
         element[0] = element[0][0] - 2, element[0][1]
