@@ -99,8 +99,35 @@ def main():
                             zooming_default =True
                         elif init.buttons_position["cancel_selected"][0] <= init.mouse[0] <= init.buttons_position["cancel_selected"][0] + 15 and init.buttons_position["cancel_selected"][1] <= init.mouse[1] <= init.buttons_position["cancel_selected"][1] + 15:
                             init.selected = False, None
-                        elif init.buttons_position["show_hide_graph"][0] <= init.mouse[0] <= init.buttons_position["show_hide_graph"][0] + init.font2.size("show")[0] and init.buttons_position["show_hide_graph"][1] <= init.mouse[1] <= init.buttons_position["show_hide_graph"][1] + init.font2.size("A")[1]:
-                            init.show_hide_graph = not init.show_hide_graph
+                        elif init.buttons_position["show_hide_graph"][0][0] <= init.mouse[0] <= init.buttons_position["show_hide_graph"][0][0] + init.font2.size("show")[0] and init.buttons_position["show_hide_graph"][0][1] <= init.mouse[1] <= init.buttons_position["show_hide_graph"][0][1] + init.font2.size("A")[1]:
+                            init.buttons_position["show_hide_graph"] = init.buttons_position["show_hide_graph"][0], not init.buttons_position["show_hide_graph"][1]
+                        elif init.buttons_position["show_hide_predators_preys_status"][0][0] <= init.mouse[0] <= init.buttons_position["show_hide_predators_preys_status"][0][0] + init.font2.size("show")[0] and init.buttons_position["show_hide_predators_preys_status"][0][1] <= init.mouse[1] <= init.buttons_position["show_hide_predators_preys_status"][0][1] + init.font2.size("A")[1]:
+                            init.buttons_position["show_hide_predators_preys_status"] = init.buttons_position["show_hide_predators_preys_status"][0] ,not init.buttons_position["show_hide_predators_preys_status"][1]
+                        elif init.buttons_position["up_prey"][0][0] <= init.mouse[0] <= init.buttons_position["up_prey"][0][0] + 15 and init.buttons_position["up_prey"][0][1] <= init.mouse[1] <= init.buttons_position["up_prey"][0][1] + 15:
+                            init.buttons_position["up_prey"] = init.buttons_position["up_prey"][0] ,not init.buttons_position["up_prey"][1]
+                            if init.up_down_prey // 2 + 18 < len(preys):
+                                init.up_down_prey += 2
+                            print(init.up_down_prey)
+
+                        elif init.buttons_position["side_bar_prey"][4]:
+
+                            if init.buttons_position["side_bar_prey"][0][0] <= mouse[0] <= init.buttons_position["side_bar_prey"][3][0] and init.buttons_position["side_bar_prey"][0][1] <= mouse[1] <= init.buttons_position["side_bar_prey"][3][1]:
+                                if init.buttons_position["side_bar_prey"][0][0] <= mouse[0] <= init.buttons_position["side_bar_prey"][2][0] and init.buttons_position["side_bar_prey"][0][1] <= mouse[1] <= init.buttons_position["side_bar_prey"][1][1]:
+                                    percent = 100 - (100 * (mouse[1] - init.buttons_position["side_bar_prey"][0][1]) / (init.buttons_position["side_bar_prey"][1][1] - init.buttons_position["side_bar_prey"][0][1]))
+                                    percent = abs(percent) * 2 / 100
+                                    init.up_down_prey = max(init.up_down_prey - 2 * round(5 * percent), 0)
+                                elif init.buttons_position["side_bar_prey"][0][0] <= mouse[0] <= init.buttons_position["side_bar_prey"][2][0] and init.buttons_position["side_bar_prey"][2][1] <= mouse[1] <= init.buttons_position["side_bar_prey"][3][1]:
+                                    percent = 100 * (mouse[1] - init.buttons_position["side_bar_prey"][2][1]) / (init.buttons_position["side_bar_prey"][3][1] -init.buttons_position["side_bar_prey"][2][1])
+                                    percent = abs(percent) * 2 / 100
+
+                                    print(init.up_down_prey, init.up_down_prey + 2 * round(5 * percent))
+                                    init.up_down_prey = min(init.up_down_prey + 2 * round(5 * percent), (len(preys) - 18)  *2)
+                                    print(init.up_down_prey)
+                                    if init.up_down_prey < 0: init.up_down_prey = 0
+                                    print(init.up_down_prey)
+                                    print("-*-*-*--*-")
+
+
 
 
 
@@ -243,7 +270,7 @@ def main():
         map_panel(screen, preys, predators, init.cage, init, position)
         init.clock.tick(500)
 
-        draw(screen, init)
+        draw(screen, init, preys, predators)
         pygame.display.update()
 
         if zooming_default:

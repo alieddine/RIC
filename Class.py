@@ -20,9 +20,13 @@ class Init:
         self.data = ["50", "0.5", "15", "50", "1", "15", "3"]
         self.preys_rect = []
         self.predators_rect = []
-        self.right_panel_state = True
         self.zoom = 1
-        self.buttons_position = {"cancel_selected" : (0, 0)}
+
+
+
+
+
+
         self.prey_original_img = pygame.transform.rotate(scale_image(pygame.image.load("images/green_object_FILL.png"), 0.2), 90)
         self.predator_original_img = pygame.transform.rotate(scale_image(pygame.image.load("images/red_object_FILL.png"), 0.2), 90)
         self.predator1_original_img = pygame.transform.rotate(scale_image(pygame.image.load("images/test_object.png"), 0.2), 90)
@@ -37,6 +41,9 @@ class Init:
         self.half_seceond_passed = False
         self.max_preys = 0
         self.m = 0
+
+        self.buttons_position = {"side_bar_prey":[None,None,None,None,False],"cancel_selected": (0, 0), "plus_button": (self.display.current_w * 0.82 + self.font2.size(f'Zoom : {round(self.zoom)}')[0],self.display.current_h * 0.1 + 5),"minus_button": (self.display.current_w * 0.84 + self.font2.size(f'Zoom : {round(self.zoom)}')[0],self.display.current_h * 0.1 + 5),"default_button": (self.display.current_w * 0.84 + self.font2.size(f'Zoom : {round(self.zoom)}')[0] + 30, self.display.current_h * 0.1),"show_hide_graph": ((self.display.current_w * 0.81 + self.font2.size("show graph : ")[0] + 5, self.display.current_h * 0.1 + self.font2.size("A")[1] * 2), False),"show_hide_predators_preys_status": ((self.display.current_w * 0.81 +self.font2.size("Preys and Predators :  ")[0],self.display.current_h * 0.1 +self.font2.size("a")[1] * 3), False),"default_button": (self.display.current_w * 0.84 + self.font2.size(f'Zoom : {round(self.zoom)}')[0] + 30, self.display.current_h * 0.1), "up_prey":((self.display.current_w *0.8 + self.display.current_w *0.2*0.05+ self.display.current_w *0.2*0.95*0.02, self.display.current_h * 0.3 +  self.display.current_h * 0.7 * 0.07 +  self.display.current_h * 0.93 *0.02 *0.7), False)}
+        self.up_down_prey = 0
     cage = 0, 0
 
 
@@ -66,6 +73,7 @@ class Animal:
         self.rect = pygame.Rect(self.x, self.y, self.img.get_size()[0], self.img.get_size()[1])
         self.health = 100
         self.name = ""
+        self.birthday = time.time()
     dt = 0
 
     def draw(self, screen, position):
@@ -121,7 +129,12 @@ class Prey(Animal):
     def eat(self, predators, init):
         index = pygame.Rect.collidelist(self.rect, init.predators_rect)
         if index != -1:
-            predators[index].health -= 20
+            predators[index].health -= 10
+            self.angle += 180
+            self.vel = 2
+            self.move()
+            self.vel = 0
+            self.angle -= 180
             if predators[index].health == 0:
                 if predators[index] == init.selected[1]:
                     init.selected = False, None
@@ -137,8 +150,9 @@ class Predator(Animal):
     def eat(self, preys, init):
         index = pygame.Rect.collidelist(self.rect, init.preys_rect)
         if index != -1:
-            preys[index].health -= 50
+            preys[index].health -= 10
             self.angle += 180
+            self.vel = 2
             self.move()
             self.vel = 0
             self.angle -= 180
@@ -146,6 +160,7 @@ class Predator(Animal):
                 if preys[index] == init.selected[1]:
                     init.selected = False, None
                 preys.pop(index)
+                if init.up_down_prey - 2 >= 0 :init.up_down_prey -= 2
                 init.preys_rect.pop(index)
         return preys
 

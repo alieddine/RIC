@@ -17,79 +17,71 @@ def blit_rotate_center(win, image, top_left, angle):
     win.blit(rotated_image, new_rect.topleft)
 
 
-def draw(screen, init):
-
+def draw(screen, init, preys, predators):
+    # move this position to Inint class
+    right_panel = pygame.Surface((init.display.current_w * 0.2, init.display.current_h * 0.7))
+    right_panel.fill((100, 0, 0))
+    right_panel.set_alpha(128)
     fps_text = init.font.render(f'FPS : {round(init.clock.get_fps())}', True, (255, 255, 255))
     # screen.blit(init.menu_background, (init.display.current_w * 0.8, 0))
-    right_panel = pygame.Surface((init.display.current_w * 0.2, init.display.current_h * 0.3))
-    right_panel.fill((10, 10, 10))
-    right_panel.set_alpha(128)
-    screen.blit(right_panel, (init.display.current_w * 0.8, 0))
+    top_right_panel = pygame.Surface((init.display.current_w * 0.2, init.display.current_h * 0.3))
+    top_right_panel.fill((10, 10, 10))
+    top_right_panel.set_alpha(128)
+    screen.blit(top_right_panel, (init.display.current_w * 0.8, 0))
     pygame.draw.line(screen, (255, 255, 255), (init.display.current_w * 0.8, 0), (init.display.current_w * 0.8, init.display.current_h), 2)
     pygame.draw.line(screen, (255, 255, 255), (init.display.current_w * 0.8, init.display.current_h * 0.3), (init.display.current_w, init.display.current_h * 0.3), 2)
 
-    if init.right_panel_state:
-        right_panel = pygame.Surface((init.display.current_w * 0.2, init.display.current_h * 0.7))
-        right_panel.fill((100, 0, 0))
-        right_panel.set_alpha(128)
-        if init.show_hide_graph:
-            now = time.time()
-            second = now - init.prev_time
-            graph_prey = pygame.Surface((right_panel.get_width() * 0.8, right_panel.get_height() * 0.3))
-            graph_prey.fill((0, 0, 0))
-            prey_text_number = init.font2.render(f"Prey  :  {len(init.preys_rect)}", True, (255, 255, 255))
-            graph_prey.blit(prey_text_number, (5, 5))
-            pygame.draw.rect(graph_prey, (255, 255, 255), (0, 0, graph_prey.get_width(), graph_prey.get_height()), 2, 2)
-            pygame.draw.line(graph_prey, (255, 255, 255), (0, init.font2.size("A")[1] + 7), (graph_prey.get_width(), init.font2.size("A")[1] + 7), 2)
-            max_changed = False
-            if second >= 0.5:
-                init.half_seceond_passed = not init.half_seceond_passed
-                init.prev_time = now
+    if init.buttons_position["show_hide_graph"][1]:
+        now = time.time()
+        second = now - init.prev_time
+        graph_prey = pygame.Surface((right_panel.get_width() * 0.8, right_panel.get_height() * 0.3))
+        graph_prey.fill((0, 0, 0))
+        prey_text_number = init.font2.render(f"Prey  :  {len(init.preys_rect)}", True, (255, 255, 255))
+        graph_prey.blit(prey_text_number, (5, 5))
+        pygame.draw.rect(graph_prey, (255, 255, 255), (0, 0, graph_prey.get_width(), graph_prey.get_height()), 2, 2)
+        pygame.draw.line(graph_prey, (255, 255, 255), (0, init.font2.size("A")[1] + 7), (graph_prey.get_width(), init.font2.size("A")[1] + 7), 2)
+        max_changed = False
+        if second >= 0.5:
+            init.half_seceond_passed = not init.half_seceond_passed
+            init.prev_time = now
 
-                if init.max_preys < len(init.preys_rect):
-                    init.m = init.max_preys
-                    max_changed = True
-                    init.max_preys = len(init.preys_rect)
-            if init.half_seceond_passed:
-                size_preys = (init.font2.size("A")[1] + 9) + (graph_prey.get_height() * 0.9) - ((len(init.preys_rect) / init.max_preys) * (graph_prey.get_height() * 0.9))
-                init.graph_prey_lines.append([(graph_prey.get_width() - 2, graph_prey.get_height() - 2), (graph_prey.get_width() - 2, size_preys -2), len(init.preys_rect)])
-                for element in init.graph_prey_lines:
-                    if max_changed:
-                        size_preys = (init.font2.size("A")[1] + 9) + (graph_prey.get_height() * 0.9) - (
-                                    (element[2] / init.max_preys) * (graph_prey.get_height() * 0.9)) - 2
-                        element[0] = element[0][0] - 2, element[0][1]
-                        element[1] = element[1][0] - 2, size_preys
-                    else:
-                        element[0] = element[0][0] - 2, element[0][1]
-                        element[1] = element[1][0] - 2, element[1][1]
-                if init.graph_prey_lines[0][0][0] == 0:
-                    init.graph_prey_lines.pop(0)
-                init.half_seceond_passed = False
+            if init.max_preys < len(init.preys_rect):
+                init.m = init.max_preys
+                max_changed = True
+                init.max_preys = len(init.preys_rect)
+        if init.half_seceond_passed:
+            size_preys = (init.font2.size("A")[1] + 9) + (graph_prey.get_height() * 0.9) - ((len(init.preys_rect) / init.max_preys) * (graph_prey.get_height() * 0.9))
+            init.graph_prey_lines.append([(graph_prey.get_width() - 2, graph_prey.get_height() - 2), (graph_prey.get_width() - 2, size_preys -2), len(init.preys_rect)])
+            for element in init.graph_prey_lines:
+                if max_changed:
+                    size_preys = (init.font2.size("A")[1] + 9) + (graph_prey.get_height() * 0.9) - (
+                                (element[2] / init.max_preys) * (graph_prey.get_height() * 0.9)) - 2
+                    element[0] = element[0][0] - 2, element[0][1]
+                    element[1] = element[1][0] - 2, size_preys
+                else:
+                    element[0] = element[0][0] - 2, element[0][1]
+                    element[1] = element[1][0] - 2, element[1][1]
+            if init.graph_prey_lines[0][0][0] == 0:
+                init.graph_prey_lines.pop(0)
+            init.half_seceond_passed = False
 
-            if len(init.graph_prey_lines) != 0:
-                for element in init.graph_prey_lines:
-                    pygame.draw.line(graph_prey, (0, 255, 0), element[0], element[1], 2)
-            right_panel.blit(graph_prey, (right_panel.get_width() * 0.1, right_panel.get_height() * 0.6))
+        if len(init.graph_prey_lines) != 0:
+            for element in init.graph_prey_lines:
+                pygame.draw.line(graph_prey, (0, 255, 0), element[0], element[1], 2)
+        right_panel.blit(graph_prey, (right_panel.get_width() * 0.1, right_panel.get_height() * 0.6))
 
-            pygame.draw.line(right_panel, (255, 255, 255),(0, right_panel.get_height() * 0.5), (right_panel.get_width(), right_panel.get_height() * 0.5), 2)
+        pygame.draw.line(right_panel, (255, 255, 255),(0, right_panel.get_height() * 0.5), (right_panel.get_width(), right_panel.get_height() * 0.5), 2)
 
-            graph_predator = pygame.Surface((right_panel.get_width() * 0.8, right_panel.get_height() * 0.3))
-            graph_predator.fill((0, 8, 0))
-            predators_text_number = init.font2.render(f"Predator  :  {len(init.predators_rect)}", True, (255, 255, 255))
-            graph_predator.blit(predators_text_number, (5, 5))
-            right_panel.blit(graph_predator, (right_panel.get_width() * 0.1, right_panel.get_height() * 0.1))
-
-
-        screen.blit(right_panel, (init.display.current_w * 0.8, init.display.current_h * 0.3))
-
+        graph_predator = pygame.Surface((right_panel.get_width() * 0.8, right_panel.get_height() * 0.3))
+        graph_predator.fill((0, 8, 0))
+        predators_text_number = init.font2.render(f"Predator  :  {len(init.predators_rect)}", True, (255, 255, 255))
+        graph_predator.blit(predators_text_number, (5, 5))
+        right_panel.blit(graph_predator, (right_panel.get_width() * 0.1, right_panel.get_height() * 0.1))
 
     screen.blit(init.name_text, (init.display.current_w - (init.name_text.get_width() + 35), 10))
     screen.blit(init.exit_btn, (init.display.current_w - 30, 10))
     screen.blit(fps_text, (10, 10))
-    pygame.draw.line(screen, (255, 255, 255), (init.display.current_w * 0.8, 0),
-                     (init.display.current_w * 0.8, init.display.current_h), 2)
-    pygame.draw.line(screen, (255, 255, 255), (init.display.current_w * 0.8, init.display.current_h * 0.3),
-                     (init.display.current_w, init.display.current_h * 0.3), 2)
+
     if init.zoom < 1: zoom = - 1 / init.zoom
     else: zoom = init.zoom
     zoom_text = init.font2.render(f'Zoom :  {round(zoom)}', True, (255, 255, 255))
@@ -99,9 +91,7 @@ def draw(screen, init):
     screen.blit(plus_button, (init.display.current_w * 0.82 + init.font2.size(f'Zoom : {round(init.zoom)}')[0] , init.display.current_h * 0.1 + 5))
     minus_button = pygame.image.load("images/minus_btn.png")
     screen.blit(minus_button, (init.display.current_w * 0.84 + init.font2.size(f'Zoom : {round(init.zoom)}')[0] , init.display.current_h * 0.1 + 5))
-    init.buttons_position["plus_button"] = (init.display.current_w * 0.82 + init.font2.size(f'Zoom : {round(init.zoom)}')[0] , init.display.current_h * 0.1 + 5)
-    init.buttons_position["minus_button"] = (init.display.current_w * 0.84 + init.font2.size(f'Zoom : {round(init.zoom)}')[0] , init.display.current_h * 0.1 + 5)
-    init.buttons_position["default_button"] = (init.buttons_position["minus_button"][0] + 30, init.display.current_h * 0.1)
+
     if init.buttons_position["default_button"][0] <= init.mouse[0] <= init.buttons_position["default_button"][0] + init.font2.size("Default")[0] and init.buttons_position["default_button"][1] <= init.mouse[1] <= init.buttons_position["default_button"][1] + init.font2.size("Default")[1]:
         default_text = init.font2.render('Default', True, (255, 0, 0))
     else:
@@ -118,23 +108,79 @@ def draw(screen, init):
             cancel_button = pygame.image.load("images/cancel_button.png")
             screen.blit(cancel_button, (init.display.current_w * 0.81 + init.font2.size(s_text)[0] + 10,
                                         init.display.current_h * 0.1 + init.font2.size("A")[1] + 5))
-
-
     else:
         s_text = f'Selected  : None'
         selected_text = init.font2.render(s_text, True, (180, 180, 180))
     screen.blit(selected_text, (init.display.current_w * 0.81, init.display.current_h * 0.1 + init.font2.size("A")[1] * 1))
     init.buttons_position["cancel_selected"] = (init.display.current_w * 0.81 + init.font2.size(s_text)[0] + 10, init.display.current_h * 0.1 + init.font2.size("A")[1] + 5)
     graph_text = init.font2.render("graphs : ", True, (255, 255, 255))
-    if init.show_hide_graph: graph_text_show_hide = init.font2.render("show", True, (255, 0, 0))
-    else: graph_text_show_hide = init.font2.render("hide", True, (255, 255, 255))
+    preys_and_predators_text = init.font2.render("Preys and Predators :  ", True, (255, 255, 255))
+    if init.buttons_position["show_hide_predators_preys_status"][1]:
+        preys_and_predators_status = "hide"
+        status_preys_predators = pygame.Surface((right_panel.get_width() * 0.9, right_panel.get_height() * 0.90))
+        status_preys_predators.fill((0, 0, 0))
+        preys_status_title = init.font2.render(f"Preys  :  {len(init.preys_rect)}", True, (255, 255, 255))
+        predators_status_title = init.font2.render(f"Predators  :  {len(init.predators_rect)}", True, (255, 255, 255))
+        right_panel.blit(preys_status_title, (right_panel.get_width() * 0.05, right_panel.get_height() * 0.02))
+        right_panel.blit(predators_status_title, (right_panel.get_width() * 0.55, right_panel.get_height() * 0.02))
+        # pygame.draw.line(status_preys_predators, (255, 255, 255), (status_preys_predators.get_width() * 0.5, 0),(status_preys_predators.get_width() * 0.5, status_preys_predators.get_height()), 2)
+        pygame.draw.rect(status_preys_predators, (255, 255, 255), (0,0,status_preys_predators.get_width(), status_preys_predators.get_height()),2,2)
+        if init.buttons_position["up_prey"][0][0] <= init.mouse[0] <= init.buttons_position["up_prey"][0][0] + 15 and init.buttons_position["up_prey"][0][1] <= init.mouse[1] <= init.buttons_position["up_prey"][0][1] + 15:
+            up_button = pygame.image.load("images/up_red.png")
+        else:
+            up_button = pygame.image.load("images/up_white.png")
+        j = -1
+
+        for i in range(init.up_down_prey, 40 + init.up_down_prey, 2):
+            if (i) // 2 < len(preys):
+                status_preys_predators.blit(init.font.render(preys[(i)//2].name +f"   health : {preys[(i)//2].health}" , True, (255, 255, 255)), (status_preys_predators.get_width() * 0.1, 5 + (i - init.up_down_prey - 0.5) *init.font.size("A")[1]))
+                pygame.draw.line(status_preys_predators, (255, 255, 255), (init.font.size(preys[(i)//2].name +f"   health : {preys[(i)//2].health}")[0]+ status_preys_predators.get_width() * 0.15, (i - init.up_down_prey - 0.5) *init.font.size("A")[1] - 20 ) , (status_preys_predators.get_width() , (i - init.up_down_prey - 0.5) *init.font.size("A")[1] - 20 ) ,2)
+                status_preys_predators.blit(init.font.render(f"speed : {round(preys[(i)//2].vel, 2)} , age : {round(preys[(i)//2].birthday - time.time())} ", True, (255, 255, 255)), (status_preys_predators.get_width() * 0.1, 5+ ((i - init.up_down_prey -0.5 ) + 1) *init.font.size("A")[1]))
+
+
+
+        pygame.draw.line(status_preys_predators, (255,255,255), (status_preys_predators.get_width() * 0.04, status_preys_predators.get_height() * 0.1), (status_preys_predators.get_width() * 0.04, status_preys_predators.get_height() - status_preys_predators.get_height() * 0.04), round(status_preys_predators.get_width() * 0.04))
+        prey_side_bar = status_preys_predators.get_height() - status_preys_predators.get_height() * 0.04 - (status_preys_predators.get_height() * 0.1)
+        if len(preys) == 0 : size = 1
+        else : size = len(preys)
+        prey_side_bar_start =(status_preys_predators.get_height() * 0.1)  + (init.up_down_prey * 100 / (size * 2) ) * (prey_side_bar / 100)
+        prey_side_bar_end = (34 * 100 / (size * 2) ) * (prey_side_bar / 100) + prey_side_bar_start
+        if len(preys) < 18 : pygame.draw.line(status_preys_predators, (255,0,0), (status_preys_predators.get_width() * 0.04, status_preys_predators.get_height() * 0.1), (status_preys_predators.get_width() * 0.04, status_preys_predators.get_height() - status_preys_predators.get_height() * 0.04), round(status_preys_predators.get_width() * 0.04))
+        else : pygame.draw.line(status_preys_predators, (255,0,0), (status_preys_predators.get_width() * 0.04, prey_side_bar_start), (status_preys_predators.get_width() * 0.04,  prey_side_bar_end), round(status_preys_predators.get_width() * 0.04))
+
+
+        down_button = pygame.transform.rotate(pygame.image.load("images/up_white.png"), 180)
+
+        status_preys_predators.blit(up_button, (status_preys_predators.get_width() * 0.02, status_preys_predators.get_height() * 0.02))
+        status_preys_predators.blit(down_button, (status_preys_predators.get_width() * 0.02, status_preys_predators.get_height() * 0.05))
+        right_panel.blit(status_preys_predators, (right_panel.get_width() * 0.05, right_panel.get_height() * 0.07))
+        init.buttons_position["side_bar_prey"] = [(-(round(status_preys_predators.get_width() * 0.04) / 2 )+ right_panel.get_width() * 0.05 + init.display.current_w * 0.8 + status_preys_predators.get_width() * 0.04, right_panel.get_height() * 0.07 + init.display.current_h * 0.3 + status_preys_predators.get_height() * 0.1),( -(round(status_preys_predators.get_width() * 0.04) / 2 )+ right_panel.get_width() * 0.05 + init.display.current_w * 0.8 + status_preys_predators.get_width() * 0.04,right_panel.get_height() * 0.07 + init.display.current_h * 0.3 +  prey_side_bar_start),( -(round(status_preys_predators.get_width() * 0.04) / 2 )+right_panel.get_width() * 0.05 + init.display.current_w * 0.8 + status_preys_predators.get_width() * 0.04 + round(status_preys_predators.get_width() * 0.04), right_panel.get_height() * 0.07 + init.display.current_h * 0.3 +  prey_side_bar_end),(-(round(status_preys_predators.get_width() * 0.04) / 2 )+  right_panel.get_width() * 0.05 + init.display.current_w * 0.8 + status_preys_predators.get_width() * 0.04 + round(status_preys_predators.get_width() * 0.04),right_panel.get_height() * 0.07 + init.display.current_h * 0.3 +  status_preys_predators.get_height() - status_preys_predators.get_height() * 0.04),True]
+    else:
+        init.buttons_position["side_bar_prey"] = [None, None, None, None, False]
+        preys_and_predators_status = "show"
+    if init.display.current_w * 0.81 + init.font2.size("Preys and Predators :  ")[0] <= init.mouse[0] <= init.display.current_w * 0.81 + init.font2.size("Preys and Predators :  ")[0] + init.font2.size("hide")[0] and init.display.current_h * 0.1 + init.font2.size("a")[1] * 3 <= init.mouse[1] <= init.display.current_h * 0.1 + init.font2.size("A")[1] * 4:
+        preys_and_predators_text_status = init.font2.render(preys_and_predators_status, True, (255, 0, 0))
+    else:
+        preys_and_predators_text_status = init.font2.render(preys_and_predators_status, True, (255, 255, 255))
+    screen.blit(preys_and_predators_text_status, (init.display.current_w * 0.81 + init.font2.size("Preys and Predators :  ")[0], init.display.current_h * 0.1 + init.font2.size("a")[1] * 3))
+    if init.buttons_position["show_hide_graph"][1]:
+        show_graph = "hide"
+
+    else: show_graph = "show"
+    if init.buttons_position["show_hide_graph"][0][0] <= init.mouse[0] <= init.buttons_position["show_hide_graph"][0][0] + init.font2.size("show")[0] and init.buttons_position["show_hide_graph"][0][1] <= init.mouse[1] <= init.buttons_position["show_hide_graph"][0][1] + init.font2.size("A")[1]: graph_text_show_hide = init.font2.render(show_graph, True, (255, 0, 0))
+    else: graph_text_show_hide = init.font2.render(show_graph, True, (255, 255, 255))
     screen.blit(graph_text, (init.display.current_w * 0.81 ,
                                 init.display.current_h * 0.1 + init.font2.size("A")[1] * 2))
     screen.blit(graph_text_show_hide, (init.display.current_w * 0.81 + init.font2.size("show graph : ")[0] + 5,
                              init.display.current_h * 0.1 + init.font2.size("A")[1] * 2))
+    screen.blit(preys_and_predators_text, (init.display.current_w * 0.81 ,
+                            init.display.current_h * 0.1 + init.font2.size("A")[1] * 3))
     screen.blit(default_text, (init.buttons_position["minus_button"][0] + 30, init.display.current_h * 0.1))
-    init.buttons_position["show_hide_graph"] = (init.display.current_w * 0.81 + init.font2.size("show graph : ")[0] + 5, init.display.current_h * 0.1 + init.font2.size("A")[1] * 2)
-    init.buttons_position["default_button"] = (init.buttons_position["minus_button"][0] + 30, init.display.current_h * 0.1)
+    screen.blit(right_panel, (init.display.current_w * 0.8, init.display.current_h * 0.3))
+    pygame.draw.line(screen, (255, 255, 255), (init.display.current_w * 0.8, 0),    (init.display.current_w * 0.8, init.display.current_h), 2)
+    pygame.draw.line(screen, (255, 255, 255), (init.display.current_w * 0.8, init.display.current_h * 0.3),(init.display.current_w, init.display.current_h * 0.3), 2)
+
+
 
 def map_panel(screen , preys, predators, cage, init, position):
     map_width = screen.get_width() * 0.2
@@ -429,19 +475,23 @@ def check_eat(preys, predators, init):
         init.preys_rect.append(prey.rect)
     for predator in predators:
         init.predators_rect.append(predator.rect)
-
     for i in range(len(predators) - 1):
         preys = predators[i].eat(preys, init)
         index = pygame.Rect.collidelistall(init.predators_rect[i], init.predators_rect)
         if index != None:
             for elemenet in index:
                 if elemenet != i:
-                    predators[i].vel = -0.5
+                    predators[i].angle += 180
+                    predators[i].move()
+                    predators[i].vel = 0
+                    predators[i].angle -= 180
     for i in range(len(preys) - 1):
-        predators = prey.eat(predators, init)
+        predators = preys[i].eat(predators, init)
         index = pygame.Rect.collidelistall(init.preys_rect[i], init.preys_rect)
         if index != None:
             for elemenet in index:
                 if elemenet != i:
                     preys[i].vel = -0.5
+
+
     return preys, predators
