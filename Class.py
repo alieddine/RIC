@@ -74,6 +74,7 @@ class Animal:
         self.health = 100
         self.name = ""
         self.birthday = time.time()
+        self.lines = [(None,None),(None,None),(None,None)]
     dt = 0
 
     def draw(self, screen, position):

@@ -24,9 +24,14 @@ def main():
 
 
     pause = False
-    predator1 = Predator(30, 5)
+    predator1 = Predator(2, 2)
     img = scale_image(pygame.image.load("images/test_object.png"), 0.2)
-    predator1.img = pygame.transform.rotate(img, 90)
+    predator1.img = pygame.transform.rotate(img, 0)
+    predator1.lines = [
+        (predator1.x, predator1.y),
+        (predator1.x, predator1.y),
+        (predator1.x, predator1.y)
+    ]
 
     position = Position()
     zooming_in = False
@@ -155,9 +160,9 @@ def main():
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
-            predator1.angle += 10
+            predator1.angle += 1
         elif keys[pygame.K_d]:
-            predator1.angle -= 10
+            predator1.angle -= 1
         elif keys[pygame.K_w]:
             moving = True
             predator1.moveUp()
@@ -271,6 +276,8 @@ def main():
         init.clock.tick(500)
 
         draw(screen, init, preys, predators)
+        # for prey in preys:
+        update_lines(screen, preys, predators, predator1, position)
         pygame.display.update()
 
         if zooming_default:

@@ -5,6 +5,41 @@ import pygame, time
 from pygame.locals import Rect
 
 
+def update_lines(screen,preys,predators,obj, position):
+    i = 0
+    for j in range(9):
+        angle = -8 + i
+        i += 2
+        radians = math.radians(angle - obj.angle -90)
+        vertical = math.cos(radians) * 900
+        horizontal = math.sin(radians) * 900
+        new_line = (obj.x + obj.rect.width /2 - position.x, obj.y + obj.rect.height /2 - position.y), (obj.x  + vertical - position.x, obj.y +  horizontal - position.y)
+        test = None, False
+        for predator in predators:
+            coordinates = predator.rect.clipline(new_line)
+
+
+            if coordinates:
+                pygame.draw.line(screen, (255, 0, 0), new_line[0], coordinates[0], 1)
+                test = coordinates[0], True
+                break
+            else:
+                pass
+                # pygame.draw.line(screen, (255, 255, 255), new_line[0], new_line[1], 2)
+        for prey in preys:
+            coordinates = prey.rect.clipline(new_line)
+            if coordinates:
+                if test[1] and new_line[0][0] - test[0][0] + new_line[0][1] - test[0][1] < new_line[0][0] - coordinates[0][0] + new_line[0][1] - coordinates[0][1] :
+                    pass
+                    pygame.draw.line(screen, (0, 255, 0), new_line[0], coordinates[0], 1)
+                else:
+                    pass
+                    pygame.draw.line(screen, (0, 255, 0), new_line[0], coordinates[0], 1)
+                break
+            elif not test[1]:
+                pass
+                # pygame.draw.line(screen, (255, 255, 255), new_line[0], new_line[1], 2)
+
 def scale_image(img, factor):
     size = round(img.get_width() * factor), round(img.get_height() * factor)
     return pygame.transform.scale(img, size)
