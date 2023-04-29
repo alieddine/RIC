@@ -15,7 +15,7 @@ class NN:
         self.output = np.dot(input_number, self.weight) + self.bias
 
     def sigmoid(self, output):
-        self.predicted_output = 1/(1 + exp(-self.alpha * output))
+        self.predicted_output = 1 / (1 + exp(- self.alpha * output))
 
     def calculate_error(self, desired_output):
         self.error = -self.predicted_output + desired_output
